@@ -1,0 +1,263 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Political Bias Calculator</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous">
+    </script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //var bias = document.getElementById('bias');
+            var biasLabel = $('#bias');
+            var engagementLabel = $('#engagement');
+            var tweetBody = $('#tweetBody');
+            var followingBody = $('#followingBody');
+            //var ulList = $('#ulList');
+
+            //================================================================== Button click Listeners
+            $('#btnCalc').click(function () {
+                ajax("calculateBias", { "screenName": $('#userIn').val() }, bias);
+                ajax("calculatePoliticalEngagement", { "screenName": $('#userIn').val() }, engagement);
+                ajax("getTop50TweetsInDB", { "screenName": $('#userIn').val() }, tweets);
+                ajax("getTop5FollowingsInDB", { "screenName": $('#userIn').val() }, followings);
+            });
+
+            //================================================================== Call-back method
+            function bias(data) {
+
+                //changes color based on level
+                var num = parseFloat(data);
+
+                if (num == -1) {
+                    biasLabel.css("color", "gray")
+                } else if (num < 0.35) {
+                    biasLabel.css("color", "blue");
+                } else if (num >= 0.35 && num < 0.75) {
+                    biasLabel.css("color", "purple");
+                } else {
+                    biasLabel.css("color", "red");
+                }
+
+                biasLabel.text('');
+                biasLabel.append('<i><b>' + data + '<i><b>');
+            }
+
+            function engagement(data) {
+
+                //changes color based on level
+                var num = parseFloat(data);
+
+                if (num == -1) {
+                    engagementLabel.css("color", "gray");
+                }
+                else if (num < 0.25) {
+                    engagementLabel.css("color", "red");
+                } else if (num >= 0.25 && num < 0.75) {
+                    engagementLabel.css("color", "orange");
+                } else {
+                    engagementLabel.css("color", "green")
+                }
+
+                engagementLabel.text('');
+                engagementLabel.append('<i><b>' + data + '<i><b>');
+            }
+
+            function tweets(data) {
+                console.log(data);
+                tweetBody.empty();
+
+                var inc = 0;
+                for (i in data) {
+                    tweetBody.append('<tr><td><p>' + data[i].TweetString + '</p></td>' +
+                        '<td><p>' + data[i].LikeCount + '</p></td>' +
+                        '<td><p>' + data[i].RetweetCount + '</p></td>'
+                        +'</tr>');
+                    inc++;
+                }
+
+                // Default table row if nothing to fill
+                if (inc == 0) {
+                    tweetBody.append('<tr><td><p>N/A</p></td>' +
+                        '<td><p>N/A</p></td>' +
+                        '<td><p>N/A</p></td>'
+                        +'</tr>');
+                }
+            }
+
+            function followings(data) {
+                console.log(data);
+                followingBody.empty();
+
+                var inc = 0;
+                for (i in data) {
+                    followingBody.append('<tr><td><p> @' + data[i].KeyUserHandle + '</p></td></tr>');
+                    inc++;
+                }
+
+                // Default table row if nothing to fill
+                if (inc == 0) {
+                    followingBody.append('<tr><td><p> N/A</p></td></tr>');
+                }
+            }
+
+            //================================================================== Main AJAX method
+            function ajax(method, data, fn) {
+                $.ajax({
+                    type: 'GET',
+                    url: 'http://localhost:30382/ws.asmx/' + method,
+                    dataType: 'json',
+                    data: data,
+                    success: fn,
+                    error: fn //function (data) { debugger; alert('User does not exist'); }
+                    //data.responseText
+                });
+            }
+        });
+    </script>
+
+</head>
+
+<body style="background-color:lightblue">
+
+
+    <br><br>
+    <h1 align="center">Political Bias Calculator</h1>
+    <br><br><br><br>
+
+    <form>
+        <div align="center" class="form-group">
+            <label>Enter a Twitter Handle without an '@'</label>
+        </div>
+        <div align="center" class="form-group">
+            <input type="text" id="userIn" />
+        </div>
+        <div align="center" class="form-group">
+            <input type="button" id="btnCalc" value="Calculate" class="btn btn-primary" />
+        </div>
+    </form>
+
+   
+        <hr style="display:block; border:solid; border-width:3px; width:85%;
+        margin-top:100px; margin-bottom:100px; background-color:black;">
+        <!---->
+
+        <table style="word-wrap:break-word; table-layout:fixed; background-color:beige; width:20%;"
+               class="table" align="center">
+            <thead style="background-color:burlywood">
+                <tr>
+                    <th style="text-align:center;" scope="col">Bias</th>
+                    <th style="text-align:center;" scope="col">Engagement</th>
+                </tr>
+            </thead>
+            <tbody id="resultBody">
+                <tr>
+                    <td style="text-align:center">
+                        <p id = "bias"></p>
+                    </td>
+                    <td style="text-align:center">
+                        <p id = "engagement"></p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+
+    <hr style="display:block; border:solid; border-width:3px; width:85%;
+        margin-top:100px; margin-bottom:100px; background-color:black;">
+       
+
+        <table style="word-wrap:break-word; table-layout:fixed; background-color:beige; width:20%;"
+               class="table" align="center">
+            <thead style="background-color:burlywood">
+                <tr>
+                    <th scope="col">Following Handle</th>
+                </tr>
+            </thead>
+            <tbody id="followingBody">
+                <tr>
+                    <td>
+                        <p>
+                            <b>@...</b>
+                        </p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table style="word-wrap:break-word; table-layout:fixed; background-color:beige; width:80%; align-content:center;"
+               class="table table-dark" align="center">
+            <thead style="background-color:burlywood;">
+                <tr>
+                    <th style="width:70%;" scope="col">Tweet</th>
+                    <th scope="col">Likes</th>
+                    <th scope="col">Retweets</th>
+                </tr>
+            </thead>
+            <tbody id="tweetBody">
+                <tr>
+                    <td>
+                        <p>
+                            <b>...</b>
+                        </p>
+                    </td>
+                    <td>...</td>
+                    <td>...</td>
+                </tr>
+            </tbody>
+        </table>
+
+    <hr style="display:block; border:solid; border-width:3px; width:85%;
+        margin-top:100px; margin-bottom:100px; background-color:black;">
+
+    <table style="word-wrap:break-word; table-layout:fixed; background-color:white; width:70%;"
+           class="table" align="center">
+        <thead style="background-color:lightgray">
+            <tr>
+                <th style="text-align:center;" colspan="2">Info</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="text-align:center;">
+                    <p><b>Bias</b> factors in the 200 most recent accounts you followed</p>
+                </td>
+                <td style="text-align:center;">
+                    <p><b>Engagement</b> factors in your 200 most recent tweets</p>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align:center;">
+                    <i>0 = more left wing, 1 = more right wing</i>
+                </td>
+                <td style="text-align:center;">
+                    <i>0 = less political, 1 = more political</i>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align:center; background-color:lightgray;"><b> COLOR SCALE </b> </td>
+            </tr>
+            <tr>
+                <td style="text-align:center;">
+                    <p style="color:gray">Gray : Private account / no political followings</p>
+                    <p style="color:blue">Blue : (0 - 0.35)</p>
+                    <p style="color:purple">Purple : (0.35 - 0.75)</p>
+                    <p style="color:red">Red : (0.75 - 1)</p>
+                </td>
+                <td style="text-align:center;">
+                    <p style="color:gray">Gray : Private account / no political tweets</p>
+                    <p style="color:red">Red : (0 - 0.25)</p>
+                    <p style="color:orange">Orange : (0.25 - 0.75)</p>
+                    <p style="color:green">Green : (0.75 - 1)</p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>
