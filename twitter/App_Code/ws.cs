@@ -52,10 +52,11 @@ public class ws : System.Web.Services.WebService {
 
 
 
-    static string consumerKey = "QicQmvc0dhor0scuqCuzt160X";
-    static string consumerKeySecret = "tTrxFWqOT3PrZRD6jSj1BeZ8VSC78kfBBWagxDfKmqYvg2KgYR";
-    static string accessToken = "909114325-BmJULIAjCf13x0XVmMWJKPnOznr8sBh7iFRRqYl4";
-    static string accessTokenSecret = "iNBl96FSx6z6fO6zyg7ZOYPD5xwpicGXOTSKnruV32gUw";
+    // Obviously fill in your own keys and secrets
+    static string consumerKey = "";
+    static string consumerKeySecret = "";
+    static string accessToken = "";
+    static string accessTokenSecret = "";
 
     static Twitter bot = new Twitter(consumerKey, consumerKeySecret, accessToken, accessTokenSecret);
 
